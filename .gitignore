@@ -1,0 +1,12 @@
+*.class
+
+*.log
+log/*
+
+*.jar
+
+*.iml
+*.ipr
+/.idea/
+
+target/*
