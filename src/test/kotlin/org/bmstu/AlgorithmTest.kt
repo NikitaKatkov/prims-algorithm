@@ -62,7 +62,9 @@ class AlgorithmTest : TestBase() {
         doTestAlgorithm(
             stringInputReader,
             CoroutineBasedPrim(4),
-            ConsoleViewer(),
+            object : ViewProvider {
+                override fun displayGraph(graph: Graph) {}
+            },
             setOf(
                 0 to 2,
                 1 to 4,
@@ -74,7 +76,7 @@ class AlgorithmTest : TestBase() {
 
     @Test
     fun runAlgorithmOnGeneratedGraph() {
-        val nodesCount = 100
+        val nodesCount = 1000
         val threadsCount = 4
 
         val fullGraph = generateFullGraph(nodesCount, GENERATION_RESULT)
@@ -82,6 +84,7 @@ class AlgorithmTest : TestBase() {
         Solver(
             FileInputReader(fullGraph.toURI()),
             CoroutineBasedPrim(threadsCount),
+            ConsoleViewer(),
             FileWriter(CALCULATION_RESULT)
         ).solve()
     }
