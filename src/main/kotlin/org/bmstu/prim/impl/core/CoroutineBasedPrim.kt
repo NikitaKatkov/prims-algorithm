@@ -12,6 +12,7 @@ import org.bmstu.prim.api.graph.Graph
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.measureTimeMillis
 
+@ObsoleteCoroutinesApi
 class CoroutineBasedPrim : Algorithm {
     companion object {
         private val LOG = LogManager.getLogger("Prim's Algorithm")
@@ -23,7 +24,6 @@ class CoroutineBasedPrim : Algorithm {
     private lateinit var graph: Graph
     private lateinit var indicesAlreadyInMst: BooleanArray
 
-    @ObsoleteCoroutinesApi
     private val threadPool = newFixedThreadPoolContext(THREADS, "Custom Thread Pool")
 
     override fun calculateMinimumSpanningTreeFor(graph: Graph): Graph {
