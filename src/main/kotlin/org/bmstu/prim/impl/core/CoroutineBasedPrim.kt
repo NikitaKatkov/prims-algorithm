@@ -20,17 +20,6 @@ class CoroutineBasedPrim(threadsCount: Int) : Algorithm {
 
     private val threadPool = newFixedThreadPoolContext(threadsCount, "Prim's Algorithm")
 
-    private fun addYetAnotherEdge() {
-        val candidates = runBlocking {
-            indicesAlreadyInMst.indices
-                .filter { indicesAlreadyInMst[it] }
-                .parallelMap(threadPool) {
-                    findMinWeightIndexNotInMst(it)
-                }
-        }
-        markEffectiveMinAmongSelection(candidates.filterNotNull(), graph)
-    }
-
     override fun calculateMinimumSpanningTreeFor(graph: Graph): Graph {
         initAlgorithm(graph)
 
@@ -39,6 +28,15 @@ class CoroutineBasedPrim(threadsCount: Int) : Algorithm {
         }
         LOG.info("Calculation completed in $measuredExecutionTime ms")
         return graph
+    }
+
+    private fun addYetAnotherEdge() {
+        val candidates = runBlocking {
+            indicesAlreadyInMst.indices
+                .filter { indicesAlreadyInMst[it] }
+                .parallelMap(threadPool) { findMinWeightIndexNotInMst(it) }
+        }
+        markEffectiveMinAmongSelection(candidates.filterNotNull(), graph)
     }
 
     private suspend fun <T, R> Iterable<T>.parallelMap(
@@ -54,7 +52,6 @@ class CoroutineBasedPrim(threadsCount: Int) : Algorithm {
     }
 
     private fun findMinWeightIndexNotInMst(currentNodeIndex: Int): EdgeCoordinates? {
-        Thread.sleep(1000)
         val siblings = graph.getSiblings(currentNodeIndex)
 
         var minWeightIndex = NODE_NOT_FOUND
@@ -69,7 +66,7 @@ class CoroutineBasedPrim(threadsCount: Int) : Algorithm {
         return if (minWeightIndex == NODE_NOT_FOUND) null else EdgeCoordinates(currentNodeIndex, minWeightIndex)
     }
 
-    private fun markEffectiveMinAmongSelection(candidates: Collection<EdgeCoordinates>, graph: Graph) {
+    private fun markEffectiveMinAmongSelection(candidates: Iterable<EdgeCoordinates>, graph: Graph) {
         with(candidates.minBy { graph.getEdgeWeight(it) }) {
             if (this == null) return
 

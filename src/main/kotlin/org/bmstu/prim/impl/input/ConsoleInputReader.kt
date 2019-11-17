@@ -2,12 +2,12 @@ package org.bmstu.prim.impl.input
 
 import org.bmstu.prim.api.graph.Graph
 import org.bmstu.prim.api.input.InputReader
-import java.io.File
 import java.net.URI
 
-class FileInputReader(private val path: URI) : InputReader {
+class ConsoleInputReader : InputReader {
     override fun parseInput(): Graph {
-        val text = File(path).readText()
-        return StringInputReader(text).parseInput()
+        println("Enter file path:")
+        val path = URI(readLine()!!)
+        return FileInputReader(path).parseInput()
     }
 }

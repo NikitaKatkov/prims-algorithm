@@ -2,14 +2,14 @@ package org.bmstu.prim
 
 import org.bmstu.prim.impl.core.CoroutineBasedPrim
 import org.bmstu.prim.impl.core.Solver
-import org.bmstu.prim.impl.input.FileInputReader
-import org.bmstu.prim.impl.view.ConsoleViewer
+import org.bmstu.prim.impl.input.ConsoleInputReader
+import org.bmstu.prim.impl.view.FileWriter
 
 fun main() {
     Solver(
-        FileInputReader("resources/graph.txt"),
+        ConsoleInputReader(),
         CoroutineBasedPrim(4),
-        ConsoleViewer
+        FileWriter("result.txt")
     ).solve()
 }
 
