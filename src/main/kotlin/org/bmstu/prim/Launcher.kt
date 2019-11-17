@@ -1,14 +1,15 @@
 package org.bmstu.prim
 
-import org.bmstu.prim.api.core.Solver
-import org.bmstu.prim.impl.core.SingleCorePrim
-import org.bmstu.prim.impl.input.ConsoleInputReader
+import org.bmstu.prim.impl.core.LightPrim
+import org.bmstu.prim.impl.core.Solver
+import org.bmstu.prim.impl.input.FileInputReader
 import org.bmstu.prim.impl.view.ConsoleViewer
 
 fun main() {
-    Solver().withInputReader(ConsoleInputReader())
-            .withAlgorithm(SingleCorePrim)
-            .withViewProvider(ConsoleViewer)
-            .solve()
+    Solver(
+        FileInputReader(),
+        LightPrim(),
+        ConsoleViewer
+    ).solve()
 }
 
