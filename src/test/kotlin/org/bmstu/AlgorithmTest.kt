@@ -4,14 +4,17 @@ import org.bmstu.prim.api.core.Algorithm
 import org.bmstu.prim.api.graph.Graph
 import org.bmstu.prim.api.input.InputReader
 import org.bmstu.prim.api.view.ViewProvider
+import org.bmstu.prim.generateFullGraph
 import org.bmstu.prim.impl.core.CoroutineBasedPrim
 import org.bmstu.prim.impl.core.Solver
+import org.bmstu.prim.impl.input.FileInputReader
 import org.bmstu.prim.impl.input.StringInputReader
 import org.bmstu.prim.impl.view.ConsoleViewer
+import org.bmstu.prim.impl.view.FileWriter
 import org.junit.Assert
 import org.junit.Test
 
-class AlgorithmTest {
+class AlgorithmTest : TestBase() {
 
     private fun doTestAlgorithm(
         inputReader: InputReader,
@@ -67,5 +70,19 @@ class AlgorithmTest {
                 4 to 3
             )
         )
+    }
+
+    @Test
+    fun runAlgorithmOnGeneratedGraph() {
+        val nodesCount = 100
+        val threadsCount = 4
+
+        val fullGraph = generateFullGraph(nodesCount, GENERATION_RESULT)
+
+        Solver(
+            FileInputReader(fullGraph.toURI()),
+            CoroutineBasedPrim(threadsCount),
+            FileWriter(CALCULATION_RESULT)
+        ).solve()
     }
 }
