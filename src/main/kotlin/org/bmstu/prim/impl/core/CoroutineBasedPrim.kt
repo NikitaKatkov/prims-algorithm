@@ -1,65 +1,62 @@
 package org.bmstu.prim.impl.core
 
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.newFixedThreadPoolContext
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.apache.log4j.LogManager
 import org.bmstu.prim.api.core.Algorithm
 import org.bmstu.prim.api.graph.EdgeCoordinates
-import org.bmstu.prim.api.graph.EdgeData
 import org.bmstu.prim.api.graph.Graph
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.measureTimeMillis
 
 @ObsoleteCoroutinesApi
-class CoroutineBasedPrim : Algorithm {
+class CoroutineBasedPrim(threadsCount: Int) : Algorithm {
     companion object {
         private val LOG = LogManager.getLogger("Prim's Algorithm")
         private const val NODE_NOT_FOUND = -1
-
-        private const val THREADS = 4
     }
 
     private lateinit var graph: Graph
     private lateinit var indicesAlreadyInMst: BooleanArray
 
-    private val threadPool = newFixedThreadPoolContext(THREADS, "Custom Thread Pool")
+    private val threadPool = newFixedThreadPoolContext(threadsCount, "Prim's Algorithm")
+
+    private fun addYetAnotherEdge() {
+        val candidates = runBlocking {
+            indicesAlreadyInMst.indices
+                .filter { indicesAlreadyInMst[it] }
+                .parallelMap(threadPool) {
+                    findMinWeightIndexNotInMst(it)
+                }
+        }
+        markEffectiveMinAmongSelection(candidates.filterNotNull(), graph)
+    }
 
     override fun calculateMinimumSpanningTreeFor(graph: Graph): Graph {
         initAlgorithm(graph)
 
         val measuredExecutionTime = measureTimeMillis {
-            for (iteration in 0 until graph.nodesNumber) {
-                val candidates = mutableListOf<EdgeCoordinates>()
-
-                runBlocking {
-                    for (alreadyAddedNodeIndex in indicesAlreadyInMst.indices) {
-                        if (!indicesAlreadyInMst[alreadyAddedNodeIndex]) continue
-
-                        val localMinWeightIndex = wrapIntoCoroutine(threadPool) {
-                            findMinWeightIndexNotInMst(graph.getSiblings(alreadyAddedNodeIndex))
-                        } ?: continue
-
-                        candidates.add(EdgeCoordinates(alreadyAddedNodeIndex, localMinWeightIndex))
-                    }
-                }
-                markEffectiveMinAmongSelection(candidates, graph)
-            }
+            for (iteration in 0 until graph.nodesNumber) addYetAnotherEdge()
         }
         LOG.info("Calculation completed in $measuredExecutionTime ms")
         return graph
     }
 
-    private suspend fun <T> wrapIntoCoroutine(context: CoroutineContext, heavyTask: () -> T?): T? =
-        withContext(context) {
-            LOG.debug("Performing task...")
-            heavyTask()
-        }.also {
-            LOG.debug("Sub-task calculation completed")
-        }
+    private suspend fun <T, R> Iterable<T>.parallelMap(
+        context: CoroutineContext,
+        heavyMappingOperation: suspend (T) -> R
+    ): List<R> = withContext(context) {
+        map {
+            async {
+                LOG.debug("Submitting task")
+                heavyMappingOperation(it)
+            }
+        }.awaitAll()
+    }
 
-    private fun findMinWeightIndexNotInMst(siblings: Array<EdgeData>): Int? {
+    private fun findMinWeightIndexNotInMst(currentNodeIndex: Int): EdgeCoordinates? {
+        Thread.sleep(1000)
+        val siblings = graph.getSiblings(currentNodeIndex)
+
         var minWeightIndex = NODE_NOT_FOUND
         var minWeight = Int.MAX_VALUE
 
@@ -69,10 +66,10 @@ class CoroutineBasedPrim : Algorithm {
                 minWeightIndex = index
             }
         }
-        return if (minWeightIndex == NODE_NOT_FOUND) null else minWeightIndex
+        return if (minWeightIndex == NODE_NOT_FOUND) null else EdgeCoordinates(currentNodeIndex, minWeightIndex)
     }
 
-    private fun markEffectiveMinAmongSelection(candidates: List<EdgeCoordinates>, graph: Graph) {
+    private fun markEffectiveMinAmongSelection(candidates: Collection<EdgeCoordinates>, graph: Graph) {
         with(candidates.minBy { graph.getEdgeWeight(it) }) {
             if (this == null) return
 

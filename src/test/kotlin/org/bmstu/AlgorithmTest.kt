@@ -36,7 +36,7 @@ class AlgorithmTest {
     }
 
     @Test
-    fun testSingleCorePrim() {
+    fun testPrimMstCalculation() {
         doTestAlgorithm(
             """
                 5
@@ -49,7 +49,7 @@ class AlgorithmTest {
                 2 3 8
                 3 4 3
             """.trimIndent(),
-            CoroutineBasedPrim(),
+            CoroutineBasedPrim(4),
             setOf(
                 0 to 2,
                 1 to 4,

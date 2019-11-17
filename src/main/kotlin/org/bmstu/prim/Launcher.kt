@@ -8,7 +8,7 @@ import org.bmstu.prim.impl.view.ConsoleViewer
 fun main() {
     Solver(
         FileInputReader("resources/graph.txt"),
-        CoroutineBasedPrim(),
+        CoroutineBasedPrim(4),
         ConsoleViewer
     ).solve()
 }
