@@ -76,7 +76,7 @@ class AlgorithmTest : TestBase() {
 
     @Test
     fun runAlgorithmOnGeneratedGraph() {
-        val nodesCount = 1000
+        val nodesCount = 3000
         val threadsCount = 4
 
         val fullGraph = generateFullGraph(nodesCount, GENERATION_RESULT)
