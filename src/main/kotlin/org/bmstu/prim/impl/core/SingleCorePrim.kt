@@ -5,7 +5,7 @@ import org.bmstu.prim.api.graph.EdgeCoordinates
 import org.bmstu.prim.api.graph.EdgeData
 import org.bmstu.prim.api.graph.Graph
 
-class CoroutineBasedPrim(val threadsCount: Int) : Algorithm {
+class SingleCorePrim(val threadsCount: Int) : Algorithm {
     companion object {
         private const val NODE_NOT_FOUND = -1
     }

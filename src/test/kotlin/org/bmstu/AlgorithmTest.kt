@@ -5,7 +5,7 @@ import org.bmstu.prim.api.graph.Graph
 import org.bmstu.prim.api.input.InputReader
 import org.bmstu.prim.api.view.ViewProvider
 import org.bmstu.prim.generateFullGraph
-import org.bmstu.prim.impl.core.CoroutineBasedPrim
+import org.bmstu.prim.impl.core.SingleCorePrim
 import org.bmstu.prim.impl.core.Solver
 import org.bmstu.prim.impl.input.FileInputReader
 import org.bmstu.prim.impl.input.StringInputReader
@@ -61,7 +61,7 @@ class AlgorithmTest : TestBase() {
         )
         doTestAlgorithm(
             stringInputReader,
-            CoroutineBasedPrim(4),
+            SingleCorePrim(4),
             object : ViewProvider {
                 override fun displayGraph(graph: Graph) {}
             },
@@ -83,7 +83,7 @@ class AlgorithmTest : TestBase() {
 
         Solver(
             FileInputReader(fullGraph.toURI()),
-            CoroutineBasedPrim(threadsCount),
+            SingleCorePrim(threadsCount),
             ConsoleViewer(),
             FileWriter(CALCULATION_RESULT)
         ).solve()
